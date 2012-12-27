@@ -12,18 +12,30 @@ class parser
 	}
 	public function parse($url){
 		$dom = new DOMDocument();
-		$dom->loadHTMLFile($url);
+		@$dom->loadHTMLFile($url);
 		$nodes = $dom->getElementsByTagName('*');
 		$result = array();
+		$denied = array('head', 'title', 'meta', 'style', 'script', 'link', 'body');
 		foreach($nodes as $node){
 			$childs = $node->childNodes;
 			foreach($childs as $child){
 				if($child->nodeType == 1){
-					$result[] = json_encode(array(
-						'name' => $child->nodeName,
-						'value' => $child->nodeValue,
-						'childs' => count($child->childNodes)
-					));
+					if(!in_array($child->nodeName, $denied)){
+						$obj = $child->childNodes;
+						foreach($obj as $tbl){
+							if($tbl->nodeType == 1)
+								$result[] = json_encode(array(
+									'name' => $tbl->nodeName
+									// 'value' => $child->nodeValue,
+									// 'childs' => count($tbl->childNodes)
+								));
+						}
+					}
+						/*$result[] = json_encode(array(
+							'name' => $child->nodeName,
+							'value' => $child->nodeValue,
+							'childs' => count($child->childNodes)
+						));*/
 				}
 			}
 		}
@@ -32,7 +44,7 @@ class parser
 }
 
 $parser = new parser();
-$setUrl = $parser->parse('./toparse.html');
+$setUrl = $parser->parse('http://95.38.61.77');
 print_r($setUrl);
 
 /*
